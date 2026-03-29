@@ -42,7 +42,7 @@ const uuid_1 = require("uuid");
 const EventBus_1 = __importStar(require("../events/EventBus"));
 const storageHandler_1 = require("../handlers/storageHandler");
 const router = (0, express_1.Router)();
-const upload = (0, multer_1.default)({ storage: multer_1.default.memoryStorage() });
+const upload = (0, multer_1.default)({ storage: multer_1.default.memoryStorage(), limits: { fileSize: 1 * 1024 * 1024 } }); // 1 MB max
 const ANALYSIS_TIMEOUT_MS = 30000;
 // POST /analyze ────────────────────────────────────────────────────────────────
 router.post('/analyze', upload.single('resume'), (req, res) => {

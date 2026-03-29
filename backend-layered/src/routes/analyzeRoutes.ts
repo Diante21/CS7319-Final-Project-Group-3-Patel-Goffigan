@@ -6,7 +6,7 @@ import { getAllResults, getResultById } from '../dataAccess/resultsRepository';
 const router = Router();
 
 // Store uploaded files in memory so we can read them as text
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 1 * 1024 * 1024 } }); // 1 MB max
 
 // POST /analyze ───────────────────────────────────────────────────────────────
 router.post(

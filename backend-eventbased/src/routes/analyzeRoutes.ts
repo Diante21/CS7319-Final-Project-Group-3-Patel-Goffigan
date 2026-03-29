@@ -6,7 +6,7 @@ import { SubmittedPayload, StoredPayload, ErrorPayload } from '../models/types';
 import { getAllResults, getResultById } from '../handlers/storageHandler';
 
 const router = Router();
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 1 * 1024 * 1024 } }); // 1 MB max
 
 const ANALYSIS_TIMEOUT_MS = 30_000;
 
