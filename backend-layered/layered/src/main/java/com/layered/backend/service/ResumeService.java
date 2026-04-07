@@ -27,7 +27,7 @@ public class ResumeService implements IResumeService {
         resumeRepository.save(resume);
         EvaluationResult result = scoringEngine.evaluate(resume);
         result.setResume(resume);
-        result.setAnalyzed_at(LocalDateTime.now());
+        result.setAnalyzedAt(LocalDateTime.now());
         evaluationResultRepository.save(result);
         return result;
     }

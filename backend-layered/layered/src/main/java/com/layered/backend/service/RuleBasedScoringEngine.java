@@ -17,7 +17,20 @@ public class RuleBasedScoringEngine {
             "git", "agile", "docker", "aws", "javascript", "react"
     );
 
+    private final AnthropicService anthropicService;
+
+
+    public RuleBasedScoringEngine(AnthropicService anthropicService) {
+        this.anthropicService = anthropicService;
+    }
+
+    /**
+     * Evaluates the resume based on keyword presence, length, and format.
+     * @param resume: The resume object containing the content to be evaluated.
+     * @return An EvaluationResult object containing the score, feedback, and keyword analysis.
+     */
     public EvaluationResult evaluate(Resume resume) {
+
         String content = resume.getContent().toLowerCase();
 
         List<String> found = new ArrayList<>();
@@ -39,7 +52,10 @@ public class RuleBasedScoringEngine {
         int totalScore = Math.min(100, keywordScore + lengthScore + formatScore);
 
         // Build feedback
-        String feedback = buildFeedback(totalScore, found, missing);
+        String feedback = anthropicService.generateFeedback(
+                resume.getContent(), totalScore, found, missing
+        );
+
 
         // Build result
         EvaluationResult result = new EvaluationResult();
@@ -52,6 +68,11 @@ public class RuleBasedScoringEngine {
         return result;
     }
 
+    /**
+     * Calculates a score based on the length of the resume content.
+     * @param content: The full text content of the resume.
+     * @return An integer score (0-20) based on the word count of the resume.
+     */
     private int calculateLengthScore(String content) {
         int wordCount = content.split("\\s+").length;
         if (wordCount >= 300) return 20;
@@ -60,6 +81,12 @@ public class RuleBasedScoringEngine {
         return 5;
     }
 
+    /**
+     * Calculates a score based on the presence of common resume sections (experience, education, skills, projects).
+     * @param content: The full text content of the resume.
+     * @return An integer score (0-20) based on the presence of
+     *          key resume sections, with 5 points for each section found.
+     */
     private int calculateFormatScore(String content) {
         int score = 0;
         if (content.contains("experience")) score += 5;
@@ -69,24 +96,5 @@ public class RuleBasedScoringEngine {
         return score;
     }
 
-    private String buildFeedback(int score, List<String> found, List<String> missing) {
-        StringBuilder fb = new StringBuilder();
 
-        if (score >= 80) {
-            fb.append("Excellent resume! ");
-        } else if (score >= 60) {
-            fb.append("Good resume with room for improvement. ");
-        } else {
-            fb.append("Resume needs significant improvement. ");
-        }
-
-        if (!found.isEmpty()) {
-            fb.append("Found keywords: ").append(String.join(", ", found)).append(". ");
-        }
-        if (!missing.isEmpty()) {
-            fb.append("Consider adding: ").append(String.join(", ", missing)).append(".");
-        }
-
-        return fb.toString();
-    }
 }
