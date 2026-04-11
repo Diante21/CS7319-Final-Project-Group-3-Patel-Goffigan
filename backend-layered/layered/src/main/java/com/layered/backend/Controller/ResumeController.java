@@ -66,7 +66,6 @@ public class ResumeController {
 
     /**
      * GET /api/resume/results/{id}
-     * <p>Fetches a previously stored {@link EvaluationResult} by its primary key.
      * @param id  the database ID of the evaluation result
      * @return 200 OK with the result, 404 if not found, or 500 on error
      */
