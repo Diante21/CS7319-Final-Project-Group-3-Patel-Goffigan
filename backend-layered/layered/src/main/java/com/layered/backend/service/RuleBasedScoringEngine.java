@@ -30,42 +30,7 @@ public class RuleBasedScoringEngine {
      * @return An EvaluationResult object containing the score, feedback, and keyword analysis.
      */
     public EvaluationResult evaluate(Resume resume) {
-
-        String content = resume.getContent().toLowerCase();
-
-        List<String> found = new ArrayList<>();
-        List<String> missing = new ArrayList<>();
-
-        // Keyword checker
-        for (String keyword : KEYWORDS) {
-            if (content.contains(keyword)) {
-                found.add(keyword);
-            } else {
-                missing.add(keyword);
-            }
-        }
-
-        // Score calculation
-        int keywordScore = (int) ((double) found.size() / KEYWORDS.size() * 60);
-        int lengthScore = calculateLengthScore(content);
-        int formatScore = calculateFormatScore(content);
-        int totalScore = Math.min(100, keywordScore + lengthScore + formatScore);
-
-        // Build feedback
-        String feedback = anthropicService.generateFeedback(
-                resume.getContent(), totalScore, found, missing
-        );
-
-
-        // Build result
-        EvaluationResult result = new EvaluationResult();
-        result.setScore(totalScore);
-        result.setFeedback(feedback);
-        result.setFoundKeywords(String.join(", ", found));
-        result.setMissingKeywords(String.join(", ", missing));
-        result.setAnalyzedAt(LocalDateTime.now());
-
-        return result;
+        return anthropicService.generateFeedback(resume.getContent());
     }
 
     /**
@@ -75,8 +40,8 @@ public class RuleBasedScoringEngine {
      */
     private int calculateLengthScore(String content) {
         int wordCount = content.split("\\s+").length;
-        if (wordCount >= 300) return 20;
-        if (wordCount >= 200) return 15;
+        if (wordCount >= 600) return 20;
+        if (wordCount >= 400) return 15;
         if (wordCount >= 100) return 10;
         return 5;
     }
