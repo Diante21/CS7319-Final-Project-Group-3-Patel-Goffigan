@@ -40,4 +40,6 @@ public class Resume {
 
     /** Timestamp of when the resume was submitted. */
     private LocalDateTime submittedAt;
+
+    private String jobType;
 }

@@ -19,7 +19,6 @@ public class RuleBasedScoringEngine {
 
     private final AnthropicService anthropicService;
 
-
     public RuleBasedScoringEngine(AnthropicService anthropicService) {
         this.anthropicService = anthropicService;
     }
@@ -30,36 +29,7 @@ public class RuleBasedScoringEngine {
      * @return An EvaluationResult object containing the score, feedback, and keyword analysis.
      */
     public EvaluationResult evaluate(Resume resume) {
-        return anthropicService.generateFeedback(resume.getContent());
+        return anthropicService.generateFeedback(resume.getContent(), resume.getJobType());
     }
-
-    /**
-     * Calculates a score based on the length of the resume content.
-     * @param content: The full text content of the resume.
-     * @return An integer score (0-20) based on the word count of the resume.
-     */
-    private int calculateLengthScore(String content) {
-        int wordCount = content.split("\\s+").length;
-        if (wordCount >= 600) return 20;
-        if (wordCount >= 400) return 15;
-        if (wordCount >= 100) return 10;
-        return 5;
-    }
-
-    /**
-     * Calculates a score based on the presence of common resume sections (experience, education, skills, projects).
-     * @param content: The full text content of the resume.
-     * @return An integer score (0-20) based on the presence of
-     *          key resume sections, with 5 points for each section found.
-     */
-    private int calculateFormatScore(String content) {
-        int score = 0;
-        if (content.contains("experience")) score += 5;
-        if (content.contains("education")) score += 5;
-        if (content.contains("skills")) score += 5;
-        if (content.contains("projects")) score += 5;
-        return score;
-    }
-
 
 }

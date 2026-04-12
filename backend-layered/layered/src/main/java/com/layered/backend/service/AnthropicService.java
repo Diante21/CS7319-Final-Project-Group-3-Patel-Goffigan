@@ -42,17 +42,18 @@ public class AnthropicService {
     /**
      * Generates AI feedback for a resume based on its content, current score, and keyword analysis.
      * @param resumeContent: The full text content of the resume being analyzed.
+     * @param jobType: Type of job the resume is based on (e.g. "Software Engineer", "Data Scientist")
+     *               to tailor feedback and keyword analysis.
      * @return
      */
-    public EvaluationResult generateFeedback(String resumeContent) {
+    public EvaluationResult generateFeedback(String resumeContent, String jobType) {
         try {
-
 
             String requestBody = objectMapper.writeValueAsString(Map.of(
                     "model", "claude-opus-4-5",
                     "max_tokens", 1024,
                     "messages", List.of(
-                            Map.of("role", "user", "content", buildPrompt(resumeContent))
+                            Map.of("role", "user", "content", buildPrompt(resumeContent, jobType))
                     )
             ));
 
@@ -88,23 +89,25 @@ public class AnthropicService {
      * @param resumeContent: The full text content of the resume being analyzed.
      * @return
      */
-    private String buildPrompt(String resumeContent) {
+    private String buildPrompt(String resumeContent, String jobType) {
         return String.format("""
             You are an expert resume reviewer. Analyze this resume and provide structured feedback.
             You are an expert resume reviewer. Analyze this resume and return a JSON object only.
+            You are an expert resume reviewer specializing in %s roles.
+            Analyze this resume specifically for a %s position.
             You are an expert resume reviewer. Be a tough scorer and provide actionable feedback to help the candidate improve.
             No markdown, no extra text, just raw JSON in this exact format:
      
             {
                 "score": <number 0-100>,
-                "foundKeywords": "<comma separated keywords found>",
-                "missingKeywords": "<comma separated important missing keywords>",
-                "feedback": "<plain text actionable feedback, no markdown>"
+                "foundKeywords": "<comma separated relevant %s keywords found>",
+                "missingKeywords": "<comma separated important missing %s keywords>",
+                "feedback": "<plain text actionable feedback tailored for a %s role, no markdown>"
             }
             
-            Resume Content:
-            %s
-            """, resumeContent);
+             Resume Content:
+             %s
+            """, jobType, jobType, jobType, jobType, jobType, resumeContent);
     }
     private String cleanResponse(String response) {
         return response

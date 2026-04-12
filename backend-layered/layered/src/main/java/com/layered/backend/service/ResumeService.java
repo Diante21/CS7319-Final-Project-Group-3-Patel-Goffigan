@@ -15,6 +15,7 @@ public class ResumeService implements IResumeService {
     private final ResumeRepository resumeRepository;
     private final EvaluationResultRepository evaluationResultRepository;
 
+
     public ResumeService(RuleBasedScoringEngine scoringEngine, ResumeRepository resumeRepository, EvaluationResultRepository evaluationResultRepository) {
         this.scoringEngine = scoringEngine;
         this.resumeRepository = resumeRepository;
