@@ -1,21 +1,14 @@
-import { useEffect, useRef, useState } from 'react'
-
-const CIRCUMFERENCE = 2 * Math.PI * 48 // r=48
-
+﻿import { useEffect, useRef, useState } from 'react'
+const CIRCUMFERENCE = 2 * Math.PI * 48
 function getColor(score) {
   if (score >= 75) return 'var(--color-success)'
   if (score >= 50) return 'var(--color-warning)'
   return 'var(--color-error)'
 }
-
 export default function ScoreRing({ score = 0, grade = '', targetRole = '' }) {
   const [displayed, setDisplayed] = useState(0)
   const [animated, setAnimated]   = useState(false)
-  const prevScore = useRef(0)
-
   useEffect(() => {
-    if (score === prevScore.current) return
-    prevScore.current = score
     setAnimated(false)
     const t = setTimeout(() => {
       setDisplayed(score)
@@ -23,13 +16,10 @@ export default function ScoreRing({ score = 0, grade = '', targetRole = '' }) {
     }, 60)
     return () => clearTimeout(t)
   }, [score])
-
   const offset = animated
     ? CIRCUMFERENCE - (displayed / 100) * CIRCUMFERENCE
     : CIRCUMFERENCE
-
   const color = getColor(score)
-
   return (
     <div className="score-section">
       <div className="score-ring-wrap">
@@ -55,7 +45,6 @@ export default function ScoreRing({ score = 0, grade = '', targetRole = '' }) {
           <span className="score-ring__sub">/ 100</span>
         </div>
       </div>
-
       <div className="score-section__meta">
         <div className="score-section__grade">{grade}</div>
         {targetRole && (

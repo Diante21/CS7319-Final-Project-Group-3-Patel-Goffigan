@@ -36,8 +36,8 @@ export default function AnalyzerPage() {
 
   const [resumeText, setResumeText] = useState('')
   const [pastedText, setPastedText] = useState('')
-  const [fileName, setFileName]     = useState('')
-  const [role, setRole]             = useState(TARGET_ROLES[0])
+  const [fileName, setFileName] = useState('')
+  const [role, setRole] = useState(TARGET_ROLES[0])
 
   const handleFileText = useCallback((text, name) => {
     setResumeText(text)
@@ -78,12 +78,12 @@ export default function AnalyzerPage() {
 
   const isRunning = stage !== 'idle' && stage !== 'done'
   const hasResult = stage === 'done'
-  const isEmpty   = stage === 'idle'
+  const isEmpty = stage === 'idle'
 
   // Pipeline mode: unlock sections as stages complete
-  const isPipeline       = mode === 'pipeline'
-  const keywordUnlocked  = !isEmpty && (result.present || !isPipeline)
-  const scoringUnlocked  = !isEmpty && (result.score   || !isPipeline)
+  const isPipeline = mode === 'pipeline'
+  const keywordUnlocked = !isEmpty && (result.present || !isPipeline)
+  const scoringUnlocked = !isEmpty && (result.score || !isPipeline)
   const feedbackUnlocked = !isEmpty && (result.suggestions || !isPipeline)
 
   const text = resumeText || pastedText
@@ -172,13 +172,13 @@ export default function AnalyzerPage() {
                 </div>
                 {scoringUnlocked && result.score
                   ? <div className="fade-in">
-                      <ScoreRing score={result.score} grade={result.grade} targetRole={role} />
-                      {hasResult && (
-                        <div style={{ marginTop: 16 }}>
-                          <CategoryPills />
-                        </div>
-                      )}
-                    </div>
+                    <ScoreRing score={result.score} grade={result.grade} targetRole={role} />
+                    {hasResult && (
+                      <div style={{ marginTop: 16 }}>
+                        <CategoryPills />
+                      </div>
+                    )}
+                  </div>
                   : <SkeletonSection type="ring" />
                 }
               </div>
@@ -188,8 +188,8 @@ export default function AnalyzerPage() {
                 <div className="results-section__title">Keyword Analysis</div>
                 {keywordUnlocked && result.present
                   ? <div className="fade-in">
-                      <KeywordTags present={result.present} missing={result.missing} />
-                    </div>
+                    <KeywordTags present={result.present} missing={result.missing} />
+                  </div>
                   : <SkeletonSection type="tags" />
                 }
               </div>
@@ -199,8 +199,8 @@ export default function AnalyzerPage() {
                 <div className="results-section__title">Improvement Suggestions</div>
                 {feedbackUnlocked && result.suggestions
                   ? <div className="fade-in">
-                      <FeedbackList suggestions={result.suggestions} />
-                    </div>
+                    <FeedbackList suggestions={result.suggestions} />
+                  </div>
                   : <SkeletonSection type="lines" />
                 }
               </div>

@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react'
+﻿import { useState, useRef, useCallback } from 'react'
 import { Upload, File, X, Loader } from 'lucide-react'
 
 const ACCEPTED = { 'application/pdf': '.pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '.docx', 'text/plain': '.txt' }
@@ -17,7 +17,7 @@ async function extractText(file) {
 
   if (name.endsWith('.pdf')) {
     const pdfjsLib = await import('pdfjs-dist')
-    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`
+    pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).href
     const arrayBuffer = await file.arrayBuffer()
     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
     let text = ''
@@ -99,7 +99,7 @@ export default function FileUploadZone({ onTextExtracted }) {
         onDragOver={(e) => { e.preventDefault(); setDragover(true) }}
         onDragLeave={() => setDragover(false)}
         onDrop={onDrop}
-        onClick={() => !file && inputRef.current?.click()}
+        
         role="button"
         tabIndex={0}
         aria-label="File upload zone"
@@ -118,7 +118,7 @@ export default function FileUploadZone({ onTextExtracted }) {
         {loading ? (
           <>
             <Loader size={32} className="upload-zone__icon" style={{ animation: 'spin 0.8s linear infinite' }} />
-            <div className="upload-zone__progress">Extracting text…</div>
+            <div className="upload-zone__progress">Extracting textâ€¦</div>
           </>
         ) : file ? (
           <div className="upload-zone__file">
@@ -132,7 +132,7 @@ export default function FileUploadZone({ onTextExtracted }) {
           <>
             <Upload size={32} className="upload-zone__icon" aria-hidden="true" />
             <div className="upload-zone__title">Drop your resume here</div>
-            <div className="upload-zone__sub">PDF, DOCX, or TXT — text extracted client-side</div>
+            <div className="upload-zone__sub">PDF, DOCX, or TXT â€” text extracted client-side</div>
           </>
         )}
       </div>
