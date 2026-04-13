@@ -12,11 +12,6 @@ import java.util.List;
 @Component
 public class RuleBasedScoringEngine {
 
-    private static final List<String> KEYWORDS = List.of(
-            "java", "spring", "python", "sql", "rest", "api",
-            "git", "agile", "docker", "aws", "javascript", "react"
-    );
-
     private final AnthropicService anthropicService;
 
     public RuleBasedScoringEngine(AnthropicService anthropicService) {
@@ -29,7 +24,7 @@ public class RuleBasedScoringEngine {
      * @return An EvaluationResult object containing the score, feedback, and keyword analysis.
      */
     public EvaluationResult evaluate(Resume resume) {
-        return anthropicService.generateFeedback(resume.getContent(), resume.getJobType());
+        return anthropicService.generateFeedback(resume.getContent(), resume.getJobDescription());
     }
 
 }
