@@ -42,18 +42,17 @@ public class AnthropicService {
     /**
      * Generates AI feedback for a resume based on its content, current score, and keyword analysis.
      * @param resumeContent: The full text content of the resume being analyzed.
-     * @param jobType: Type of job the resume is based on (e.g. "Software Engineer", "Data Scientist")
-     *               to tailor feedback and keyword analysis.
+     * @param jobDescription: Job description text associated with the resume submission, used for matching and analysis.
      * @return
      */
-    public EvaluationResult generateFeedback(String resumeContent, String jobType) {
+    public EvaluationResult generateFeedback(String resumeContent, String jobDescription) {
         try {
 
             String requestBody = objectMapper.writeValueAsString(Map.of(
                     "model", "claude-opus-4-5",
                     "max_tokens", 1024,
                     "messages", List.of(
-                            Map.of("role", "user", "content", buildPrompt(resumeContent, jobType))
+                            Map.of("role", "user", "content", buildPrompt(resumeContent, jobDescription))
                     )
             ));
 
@@ -89,26 +88,36 @@ public class AnthropicService {
      * @param resumeContent: The full text content of the resume being analyzed.
      * @return
      */
-    private String buildPrompt(String resumeContent, String jobType) {
-        return String.format("""
-            You are an expert resume reviewer. Analyze this resume and provide structured feedback.
-            You are an expert resume reviewer. Analyze this resume and return a JSON object only.
-            You are an expert resume reviewer specializing in %s roles.
-            Analyze this resume specifically for a %s position.
+    private String buildPrompt(String resumeContent, String jobDescription) {
+        return """
+            You are an expert resume reviewer.
+            Your job is to Analyze this resume and provide structured feedback by comparing a candidate's resume against
+            a specific job description
             You are an expert resume reviewer. Be a tough scorer and provide actionable feedback to help the candidate improve.
+            Score is not just based on keywords alone, it should be tailored to the specific job description
+            and the quality of the resume content.
             No markdown, no extra text, just raw JSON in this exact format:
      
             {
-                "score": <number 0-100>,
-                "foundKeywords": "<comma separated relevant %s keywords found>",
-                "missingKeywords": "<comma separated important missing %s keywords>",
-                "feedback": "<plain text actionable feedback tailored for a %s role, no markdown>"
+                       "score": <number 0-100 based on how well the resume matches the job description>,
+                       "foundKeywords": "<comma separated keywords from the job description found in the resume>",
+                       "missingKeywords": "<comma separated important keywords from the job description missing in the resume>",
+                       "feedback": "<plain text actionable feedback on how to better align the resume with the job description, no markdown>"
             }
-            
-             Resume Content:
-             %s
-            """, jobType, jobType, jobType, jobType, jobType, resumeContent);
+           
+           Job Description:
+           """ + jobDescription + """
+   
+           Resume Content:
+           """ + resumeContent;
     }
+
+
+    /**
+     * Cleans the AI response by removing markdown formatting, headers, and extraneous whitespace, ensuring we can parse the JSON content reliably.
+     * @param response
+     * @return
+     */
     private String cleanResponse(String response) {
         return response
                 .replaceAll("\\*\\*", "")      // remove bold **
@@ -146,6 +155,10 @@ public class AnthropicService {
         }
     }
 
+    /**
+     * Returns a default EvaluationResult when the AI analysis fails, ensuring the system remains responsive.
+     * @return An EvaluationResult with a score of 0 and a generic feedback message.
+     */
     private EvaluationResult fallbackResult() {
         EvaluationResult result = new EvaluationResult();
         result.setScore(0);
