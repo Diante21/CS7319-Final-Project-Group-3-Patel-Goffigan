@@ -1,4 +1,4 @@
-﻿import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { useArchMode } from '../context/ArchitectureContext.jsx'
 import { PIPELINE_EVENTS, PERSIST_STATUS } from '../utils/constants.jsx'
 import { analyzeText } from '../api.js'
@@ -26,7 +26,7 @@ export function usePipeline() {
     setState(INITIAL_STATE)
   }, [])
 
-  const startPipeline = useCallback(({ text, targetRole }) => {
+  const startPipeline = useCallback(({ text, targetRole, jobDescription }) => {
     if (abortRef.current) abortRef.current.abort()
     abortRef.current = new AbortController()
     if (cleanupRef.current) cleanupRef.current()
@@ -37,7 +37,7 @@ export function usePipeline() {
 
     if (mode === 'monolith') {
       const startedAt = Date.now()
-      analyzeText(text, mode, signal)
+      analyzeText(text, mode, signal, jobDescription)
         .then((raw) => {
           const result = mapResponse(raw)
           const durationMs = Date.now() - startedAt
@@ -62,7 +62,7 @@ export function usePipeline() {
           console.error('[monolith] analysis failed:', err.message)
         })
     } else {
-      analyzeText(text, mode, signal)
+      analyzeText(text, mode, signal, jobDescription)
         .then((raw) => {
           const apiReturnedAt = Date.now()
           const result = mapResponse(raw)

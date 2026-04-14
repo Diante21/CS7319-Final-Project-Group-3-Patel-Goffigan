@@ -1,4 +1,4 @@
-﻿const TIMEOUT_MS = 15000
+const TIMEOUT_MS = 15000
 
 function fetchWithTimeout(url, options = {}) {
   const controller = new AbortController()
@@ -32,12 +32,12 @@ const getBaseUrl = (mode) => {
   return import.meta.env.VITE_LAYERED_URL || 'http://localhost:3001'
 }
 
-export const analyzeText = async (text, mode, signal) => {
+export const analyzeText = async (text, mode, signal, jobDescription) => {
   const baseUrl = getBaseUrl(mode)
   const response = await fetchWithTimeout(`${baseUrl}/api/analyze`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text }),
+    body: JSON.stringify({ text, jobDescription }),
     signal,
   })
   if (!response.ok) {

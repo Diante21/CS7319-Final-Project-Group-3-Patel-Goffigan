@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react'
+﻿import { useState, useCallback, useEffect, useRef } from 'react'
 import { FileText, Loader } from 'lucide-react'
 import { usePipeline } from '../hooks/usePipeline.jsx'
 import { useArchMode } from '../context/ArchitectureContext.jsx'
@@ -13,21 +13,19 @@ import SkeletonSection from '../components/analyzer/SkeletonSection.jsx'
 import SavedBadge from '../components/analyzer/SavedBadge.jsx'
 
 function saveToHistory(result, fileName, role) {
-  try {
-    const entries = JSON.parse(localStorage.getItem('resumeai_history') || '[]')
-    entries.unshift({
-      id: Date.now().toString(),
-      fileName: fileName || 'Pasted resume',
-      role,
-      date: new Date().toISOString(),
-      score: result.score,
-      grade: result.grade,
-      present: result.present,
-      missing: result.missing,
-      suggestions: result.suggestions,
-    })
-    localStorage.setItem('resumeai_history', JSON.stringify(entries.slice(0, 50)))
-  } catch { /* ignore */ }
+  const entries = JSON.parse(localStorage.getItem('resumeai_history') || '[]')
+  entries.unshift({
+    id: Date.now().toString(),
+    fileName: fileName || 'Pasted resume',
+    role,
+    date: new Date().toISOString(),
+    score: result.score,
+    grade: result.grade,
+    present: result.present,
+    missing: result.missing,
+    suggestions: result.suggestions,
+  })
+  localStorage.setItem('resumeai_history', JSON.stringify(entries.slice(0, 50)))
 }
 
 export default function AnalyzerPage() {
@@ -38,6 +36,8 @@ export default function AnalyzerPage() {
   const [pastedText, setPastedText] = useState('')
   const [fileName, setFileName] = useState('')
   const [role, setRole] = useState(TARGET_ROLES[0])
+  const [jobDescription, setJobDescription] = useState('')
+  const [saveError, setSaveError] = useState(false)
 
   const handleFileText = useCallback((text, name) => {
     setResumeText(text)
@@ -54,7 +54,8 @@ export default function AnalyzerPage() {
   const handleAnalyze = () => {
     const text = resumeText || pastedText
     if (!text.trim()) return
-    startPipeline({ text, targetRole: role })
+    savedRef.current = false
+    startPipeline({ text, targetRole: role, jobDescription })
   }
 
   const handleReset = () => {
@@ -62,25 +63,29 @@ export default function AnalyzerPage() {
     setResumeText('')
     setPastedText('')
     setFileName('')
+    setJobDescription('')
+    setSaveError(false)
   }
 
-  // Save to history once when pipeline completes — useEffect prevents render-during-render
   const savedRef = useRef(false)
   useEffect(() => {
     if (stage === 'done' && result.score && !savedRef.current) {
       savedRef.current = true
-      saveToHistory(result, fileName, role)
-      // Persist timestamps so ArchitecturePage can read them (isolated usePipeline instance)
-      try { localStorage.setItem('resumeai_timestamps', JSON.stringify(timestamps)) } catch { /* ignore */ }
+      try {
+        saveToHistory(result, fileName, role)
+        setSaveError(false)
+        localStorage.setItem('resumeai_timestamps', JSON.stringify(timestamps))
+      } catch {
+        setSaveError(true)
+      }
     }
     if (stage === 'idle') savedRef.current = false
-  }, [stage, result.score, fileName, role, timestamps])
+  }, [stage, result, fileName, role, timestamps])
 
   const isRunning = stage !== 'idle' && stage !== 'done'
   const hasResult = stage === 'done'
   const isEmpty = stage === 'idle'
 
-  // Pipeline mode: unlock sections as stages complete
   const isPipeline = mode === 'pipeline'
   const keywordUnlocked = !isEmpty && (result.present || !isPipeline)
   const scoringUnlocked = !isEmpty && (result.score || !isPipeline)
@@ -93,7 +98,7 @@ export default function AnalyzerPage() {
       <PipelineTracker stage={stage} />
 
       <div className="analyzer-layout">
-        {/* ── Left Panel — Input ── */}
+        {/* Left Panel - Input */}
         <section className="analyzer-panel input-panel" aria-label="Resume input">
           <div>
             <div className="input-panel__title">Resume Analysis</div>
@@ -109,10 +114,22 @@ export default function AnalyzerPage() {
             <textarea
               id="resume-textarea"
               className="input textarea"
-              placeholder="Paste your resume content here…"
+              placeholder="Paste your resume content here..."
               value={pastedText}
               onChange={handlePaste}
               aria-label="Resume text input"
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label" htmlFor="jd-textarea">Job Description (optional)</label>
+            <textarea
+              id="jd-textarea"
+              className="input textarea"
+              placeholder="Paste the job description here..."
+              value={jobDescription}
+              onChange={(e) => setJobDescription(e.target.value)}
+              aria-label="Job description input"
             />
           </div>
 
@@ -139,7 +156,7 @@ export default function AnalyzerPage() {
               aria-busy={isRunning}
             >
               {isRunning
-                ? <><Loader size={15} style={{ animation: 'spin 0.7s linear infinite' }} /> Analyzing…</>
+                ? <><Loader size={15} style={{ animation: 'spin 0.7s linear infinite' }} /> Analyzing...</>
                 : <><FileText size={15} strokeWidth={1.75} /> Analyze resume</>
               }
             </button>
@@ -152,7 +169,7 @@ export default function AnalyzerPage() {
           </div>
         </section>
 
-        {/* ── Right Panel — Results ── */}
+        {/* Right Panel - Results */}
         <section className="analyzer-panel results-panel" aria-label="Analysis results" aria-live="polite">
           {isEmpty ? (
             <div className="results-empty">
@@ -164,12 +181,16 @@ export default function AnalyzerPage() {
             </div>
           ) : (
             <>
-              {/* Score + Category */}
               <div className="results-section">
                 <div className="results-section__header">
                   <div className="results-section__title">Overall Score</div>
                   <SavedBadge persistStatus={persistStatus} />
                 </div>
+                {saveError && (
+                  <p className="save-error-msg" role="alert">
+                    Could not save to history - browser storage is full.
+                  </p>
+                )}
                 {scoringUnlocked && result.score
                   ? <div className="fade-in">
                     <ScoreRing score={result.score} grade={result.grade} targetRole={role} />
@@ -183,7 +204,6 @@ export default function AnalyzerPage() {
                 }
               </div>
 
-              {/* Keywords */}
               <div className="results-section">
                 <div className="results-section__title">Keyword Analysis</div>
                 {keywordUnlocked && result.present
@@ -194,7 +214,6 @@ export default function AnalyzerPage() {
                 }
               </div>
 
-              {/* Feedback */}
               <div className="results-section">
                 <div className="results-section__title">Improvement Suggestions</div>
                 {feedbackUnlocked && result.suggestions
