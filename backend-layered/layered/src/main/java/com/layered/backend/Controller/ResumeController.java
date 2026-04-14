@@ -1,4 +1,4 @@
-package com.layered.backend.Controller;
+﻿package com.layered.backend.Controller;
 
 import com.layered.backend.domain.EvaluationResult;
 import com.layered.backend.domain.Resume;
@@ -15,13 +15,13 @@ import java.time.LocalDateTime;
  *  Base path: {@code /api/resume}
  *  CORS is allowed from the React dev server at {@code http://localhost:3000}.
  *  Dependencies injected via constructor:
- *  {@link IResumeService}               – orchestrates the resume-analysis pipeline
- *  {@link EvaluationResultRepository}   – direct DB access for result look-ups
+ *  {@link IResumeService}               â€“ orchestrates the resume-analysis pipeline
+ *  {@link EvaluationResultRepository}   â€“ direct DB access for result look-ups
  *
  */
 @RestController
 @RequestMapping("/api/resume")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:5173")
 public class ResumeController {
 
     // Service layer responsible for analyzing a resume and producing an {@link EvaluationResult}.
