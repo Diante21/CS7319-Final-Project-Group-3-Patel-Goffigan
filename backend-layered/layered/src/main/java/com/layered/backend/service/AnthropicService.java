@@ -102,7 +102,7 @@ public class AnthropicService {
                        "score": <number 0-100 based on how well the resume matches the job description>,
                        "foundKeywords": "<comma separated keywords from the job description found in the resume>",
                        "missingKeywords": "<comma separated important keywords from the job description missing in the resume>",
-                       "feedback": "<plain text actionable feedback on how to better align the resume with the job description, no markdown>"
+                       "feedback": "<numbered list of 5-6 actionable feedback points, each starting with a number and period like: 1. Point one. 2. Point two. Use pipe character | to separate points>"
             }
            
            Job Description:

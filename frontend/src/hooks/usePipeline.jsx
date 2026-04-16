@@ -1,8 +1,8 @@
-import { useState, useCallback, useRef } from 'react'
+﻿import { useState, useCallback, useRef } from 'react'
 import { useArchMode } from '../context/ArchitectureContext.jsx'
 import { PIPELINE_EVENTS, PERSIST_STATUS } from '../utils/constants.jsx'
-import { analyzeText } from '../api.js'
-import { mapResponse } from '../utils/mapResponse.js'
+import { analyzeWithSpring } from '../api.js'
+import { mapSpringResponse } from '../utils/mapResponse.js'
 
 const INITIAL_STATE = {
   stage: 'idle',
@@ -26,7 +26,7 @@ export function usePipeline() {
     setState(INITIAL_STATE)
   }, [])
 
-  const startPipeline = useCallback(({ text, targetRole, jobDescription }) => {
+  const startPipeline = useCallback(({ text, targetRole, jobDescription, fileName }) => {
     if (abortRef.current) abortRef.current.abort()
     abortRef.current = new AbortController()
     if (cleanupRef.current) cleanupRef.current()
@@ -37,9 +37,9 @@ export function usePipeline() {
 
     if (mode === 'monolith') {
       const startedAt = Date.now()
-      analyzeText(text, mode, signal, jobDescription)
+      analyzeWithSpring(text, fileName, jobDescription, signal)
         .then((raw) => {
-          const result = mapResponse(raw)
+          const result = mapSpringResponse(raw)
           const durationMs = Date.now() - startedAt
           setState({
             stage: 'done',
@@ -62,10 +62,10 @@ export function usePipeline() {
           console.error('[monolith] analysis failed:', err.message)
         })
     } else {
-      analyzeText(text, mode, signal, jobDescription)
+      analyzeWithSpring(text, fileName, jobDescription, signal)
         .then((raw) => {
           const apiReturnedAt = Date.now()
-          const result = mapResponse(raw)
+          const result = mapSpringResponse(raw)
 
           const fire = (delay, payload) => {
             timers.push(setTimeout(() => {

@@ -1,17 +1,14 @@
 ﻿export function mapResponse(backendResult) {
   const { overallScore, grade, keywords, feedback } = backendResult
 
-  // present/missing keywords from technical analysis
   const present = keywords?.technical?.found ?? []
   const missing = keywords?.technical?.missing ?? []
 
-  // matchScore as percentage of keyword list matched
   const total = (keywords?.technical?.found?.length ?? 0) + (keywords?.technical?.missing?.length ?? 0)
   const matchScore = total > 0
     ? Math.round((keywords.technical.found.length / total) * 100)
     : 0
 
-  // map feedback arrays to { category, text } shape FeedbackList expects
   const suggestions = [
     ...(feedback?.critical ?? []).map((text) => ({ category: 'Keywords', text })),
     ...(feedback?.improvements ?? []).map((text) => ({ category: 'Impact', text })),
@@ -21,6 +18,48 @@
   return {
     score: overallScore,
     grade,
+    present,
+    missing,
+    matchScore,
+    suggestions,
+  }
+}
+
+function getGrade(score) {
+  if (score >= 90) return 'A+'
+  if (score >= 80) return 'A'
+  if (score >= 70) return 'B'
+  if (score >= 60) return 'C'
+  if (score >= 50) return 'D'
+  return 'F'
+}
+
+export function mapSpringResponse(raw) {
+  const score = raw?.score ?? 0
+
+  const present = raw?.foundKeywords
+    ? raw.foundKeywords.split(',').map((k) => k.trim()).filter(Boolean)
+    : []
+
+  const missing = raw?.missingKeywords
+    ? raw.missingKeywords.split(',').map((k) => k.trim()).filter(Boolean)
+    : []
+
+  const total = present.length + missing.length
+  const matchScore = total > 0 ? Math.round((present.length / total) * 100) : 0
+
+  // Split feedback by | into separate suggestion points
+  const suggestions = raw?.feedback
+    ? raw.feedback
+        .split('|')
+        .map((point) => point.trim())
+        .filter(Boolean)
+        .map((text) => ({ category: 'Impact', text }))
+    : []
+
+  return {
+    score,
+    grade: getGrade(score),
     present,
     missing,
     matchScore,

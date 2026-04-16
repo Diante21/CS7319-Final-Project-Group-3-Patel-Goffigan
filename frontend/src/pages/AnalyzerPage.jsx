@@ -55,7 +55,7 @@ export default function AnalyzerPage() {
     const text = resumeText || pastedText
     if (!text.trim()) return
     savedRef.current = false
-    startPipeline({ text, targetRole: role, jobDescription })
+    startPipeline({ text, targetRole: role, jobDescription, fileName })
   }
 
   const handleReset = () => {
@@ -74,7 +74,7 @@ export default function AnalyzerPage() {
       try {
         saveToHistory(result, fileName, role)
         setSaveError(false)
-        localStorage.setItem('resumeai_timestamps', JSON.stringify(timestamps))
+        localStorage.setItem(mode === 'monolith' ? 'resumeai_timestamps_monolith' : 'resumeai_timestamps_pipeline', JSON.stringify(timestamps))
       } catch {
         setSaveError(true)
       }

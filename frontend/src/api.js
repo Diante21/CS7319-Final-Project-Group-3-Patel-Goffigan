@@ -1,4 +1,4 @@
-const TIMEOUT_MS = 15000
+﻿const TIMEOUT_MS = 15000
 
 function fetchWithTimeout(url, options = {}) {
   const controller = new AbortController()
@@ -15,7 +15,6 @@ function fetchWithTimeout(url, options = {}) {
     })
 }
 
-// Combines multiple AbortSignals into one
 function anySignal(signals) {
   const controller = new AbortController()
   for (const signal of signals) {
@@ -38,6 +37,25 @@ export const analyzeText = async (text, mode, signal, jobDescription) => {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ text, jobDescription }),
+    signal,
+  })
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}))
+    throw new Error(err.error || `Server error: ${response.status}`)
+  }
+  return response.json()
+}
+
+export const analyzeWithSpring = async (text, fileName, jobDescription, signal) => {
+  const baseUrl = import.meta.env.VITE_SPRING_URL || 'http://localhost:8080'
+  const response = await fetchWithTimeout(`${baseUrl}/api/resume/analyze`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      content: text,
+      fileName: fileName || '',
+      jobDescription: jobDescription || '',
+    }),
     signal,
   })
   if (!response.ok) {
