@@ -37,7 +37,7 @@ export function usePipeline() {
 
     if (mode === 'monolith') {
       const startedAt = Date.now()
-      analyzeWithSpring(text, fileName, jobDescription, signal)
+      analyzeWithSpring(text, fileName, jobDescription, signal, mode)
         .then((raw) => {
           const result = mapSpringResponse(raw)
           const durationMs = Date.now() - startedAt
@@ -62,7 +62,7 @@ export function usePipeline() {
           console.error('[monolith] analysis failed:', err.message)
         })
     } else {
-      analyzeWithSpring(text, fileName, jobDescription, signal)
+      analyzeWithSpring(text, fileName, jobDescription, signal, mode)
         .then((raw) => {
           const apiReturnedAt = Date.now()
           const result = mapSpringResponse(raw)

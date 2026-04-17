@@ -24,30 +24,15 @@ function anySignal(signals) {
   return controller.signal
 }
 
-const getBaseUrl = (mode) => {
+const getSpringUrl = (mode) => {
   if (mode === 'pipeline') {
-    return import.meta.env.VITE_EVENTBASED_URL || 'http://localhost:3002'
+    return import.meta.env.VITE_PIPEFILTER_URL || 'http://localhost:8082'
   }
-  return import.meta.env.VITE_LAYERED_URL || 'http://localhost:3001'
+  return import.meta.env.VITE_SPRING_URL || 'http://localhost:8081'
 }
 
-export const analyzeText = async (text, mode, signal, jobDescription) => {
-  const baseUrl = getBaseUrl(mode)
-  const response = await fetchWithTimeout(`${baseUrl}/api/analyze`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text, jobDescription }),
-    signal,
-  })
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}))
-    throw new Error(err.error || `Server error: ${response.status}`)
-  }
-  return response.json()
-}
-
-export const analyzeWithSpring = async (text, fileName, jobDescription, signal) => {
-  const baseUrl = import.meta.env.VITE_SPRING_URL || 'http://localhost:8080'
+export const analyzeWithSpring = async (text, fileName, jobDescription, signal, mode) => {
+  const baseUrl = getSpringUrl(mode)
   const response = await fetchWithTimeout(`${baseUrl}/api/resume/analyze`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -66,10 +51,10 @@ export const analyzeWithSpring = async (text, fileName, jobDescription, signal) 
 }
 
 export const analyzeFile = async (file, mode, signal) => {
-  const baseUrl = getBaseUrl(mode)
+  const baseUrl = getSpringUrl(mode)
   const formData = new FormData()
   formData.append('resume', file)
-  const response = await fetchWithTimeout(`${baseUrl}/api/analyze`, {
+  const response = await fetchWithTimeout(`${baseUrl}/api/resume/analyze`, {
     method: 'POST',
     body: formData,
     signal,
@@ -82,7 +67,7 @@ export const analyzeFile = async (file, mode, signal) => {
 }
 
 export const getHistory = async (mode, signal) => {
-  const baseUrl = getBaseUrl(mode)
+  const baseUrl = getSpringUrl(mode)
   const response = await fetchWithTimeout(`${baseUrl}/api/results`, { signal })
   if (!response.ok) {
     throw new Error(`Server error: ${response.status}`)
