@@ -122,7 +122,7 @@ export default function AnalyzerPage() {
           </div>
 
           <div className="form-group">
-            <label className="form-label" htmlFor="jd-textarea">Job Description (optional)</label>
+            <label className="form-label" htmlFor="jd-textarea">Job Description</label>
             <textarea
               id="jd-textarea"
               className="input textarea"
