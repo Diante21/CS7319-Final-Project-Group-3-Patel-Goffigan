@@ -11,28 +11,28 @@ public class ValidationFilter implements Filter {
 
     @Override
     public ResumePayload process(ResumePayload payload) {
+        long start = System.currentTimeMillis();
         logger.info("Running ValidationFilter");
         String content = payload.getResume().getContent();
 
         if (content == null || content.isBlank()) {
             payload.setValid(false);
             payload.setValidationMessage("Resume content cannot be empty");
+            payload.recordTiming("validation", System.currentTimeMillis() - start);
             return payload;
         }
 
         if (payload.getResume().getJobDescription() == null || payload.getResume().getJobDescription().isBlank()) {
             payload.setValid(false);
             payload.setValidationMessage("Resume job description cannot be empty");
+            payload.recordTiming("validation", System.currentTimeMillis() - start);
             return payload;
         }
 
         payload.setValid(true);
         payload.setValidationMessage("Validation passed.");
-        logger.info("Resume validated.");
+        payload.recordTiming("validation", System.currentTimeMillis() - start);
+        logger.info("Resume validated. Duration: {}ms", payload.getFilterTimings().get("validation"));
         return payload;
-
     }
-
-
-
 }

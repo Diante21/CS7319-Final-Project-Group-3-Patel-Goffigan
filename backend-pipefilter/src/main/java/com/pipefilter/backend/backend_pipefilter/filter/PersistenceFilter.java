@@ -26,9 +26,11 @@ public class PersistenceFilter implements Filter {
 
     @Override
     public ResumePayload process(ResumePayload payload) {
+        long start = System.currentTimeMillis();
         logger.info("Running persistenceFilter");
 
         if (!payload.isValid()) {
+            payload.recordTiming("persistence", System.currentTimeMillis() - start);
             return payload;
         }
 
@@ -45,9 +47,9 @@ public class PersistenceFilter implements Filter {
         evaluationResultRepository.save(result);
         payload.setEvaluationResult(result);
 
-        logger.info("PersistenceFilter complete — saved result id: {}", result.getId());
+        payload.recordTiming("persistence", System.currentTimeMillis() - start);
+        logger.info("PersistenceFilter complete — saved result id: {}, duration: {}ms",
+                result.getId(), payload.getFilterTimings().get("persistence"));
         return payload;
-
-
     }
 }

@@ -22,9 +22,11 @@ public class AIScoringFilter implements Filter {
 
     @Override
     public ResumePayload process(ResumePayload payload) {
+        long start = System.currentTimeMillis();
         logger.info("Running AIScoringFilter");
 
         if (!payload.isValid()) {
+            payload.recordTiming("aiScoring", System.currentTimeMillis() - start);
             return payload;
         }
 
@@ -40,7 +42,9 @@ public class AIScoringFilter implements Filter {
         payload.setMissingKeywords(result.getMissingKeywords() != null ?
                 List.of(result.getMissingKeywords().split(", ")) : new ArrayList<>());
 
-        logger.info("AIScoringFilter complete — score: {}", result.getScore());
+        payload.recordTiming("aiScoring", System.currentTimeMillis() - start);
+        logger.info("AIScoringFilter complete — score: {}, duration: {}ms",
+                result.getScore(), payload.getFilterTimings().get("aiScoring"));
         return payload;
     }
 }

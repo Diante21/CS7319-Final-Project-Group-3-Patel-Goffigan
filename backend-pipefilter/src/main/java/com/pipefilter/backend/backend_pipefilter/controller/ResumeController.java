@@ -2,6 +2,7 @@ package com.pipefilter.backend.backend_pipefilter.controller;
 
 import com.pipefilter.backend.backend_pipefilter.domain.EvaluationResult;
 import com.pipefilter.backend.backend_pipefilter.domain.Resume;
+import com.pipefilter.backend.backend_pipefilter.domain.ResumePayload;
 import com.pipefilter.backend.backend_pipefilter.repository.EvaluationResultRepository;
 import com.pipefilter.backend.backend_pipefilter.serverInterface.IResumeService;
 import org.springframework.http.HttpStatus;
@@ -24,7 +25,9 @@ public class ResumeController {
     @PostMapping("/analyze")
     public ResponseEntity<EvaluationResult> analyzeResume(@RequestBody Resume resume) {
         try {
-            EvaluationResult result = resumeService.analyzeResume(resume);
+            ResumePayload payload = resumeService.analyzeResume(resume);
+            EvaluationResult result = payload.getEvaluationResult();
+            result.setFilterTimings(payload.getFilterTimings());
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -41,6 +44,4 @@ public class ResumeController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-
-
 }

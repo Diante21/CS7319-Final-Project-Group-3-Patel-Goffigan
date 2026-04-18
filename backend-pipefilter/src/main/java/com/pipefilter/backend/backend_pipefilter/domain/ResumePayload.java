@@ -7,7 +7,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @NoArgsConstructor
@@ -34,5 +36,13 @@ public class ResumePayload {
 
     // Final result set by PersistenceFilter
     private EvaluationResult evaluationResult;
+
+    // Per-filter timing data (milliseconds) — not persisted to DB
+    private Map<String, Long> filterTimings = new LinkedHashMap<>();
+
+    // Helper method to record filter timing
+    public void recordTiming(String filterName, long durationMs) {
+        this.filterTimings.put(filterName, durationMs);
+    }
 
 }

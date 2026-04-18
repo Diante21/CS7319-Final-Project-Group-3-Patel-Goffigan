@@ -67,6 +67,13 @@ export function usePipeline() {
           const apiReturnedAt = Date.now()
           const result = mapSpringResponse(raw)
 
+          // Use real filter timings if available, otherwise estimate
+          const ft = result.filterTimings
+          const validationMs   = ft?.validation     ?? 5
+          const extractionMs   = ft?.textExtraction ?? 10
+          const aiScoringMs    = ft?.aiScoring      ?? (apiReturnedAt - (Date.now() - 100))
+          const persistenceMs  = ft?.persistence    ?? 50
+
           const fire = (delay, payload) => {
             timers.push(setTimeout(() => {
               setState((prev) => {
@@ -101,15 +108,15 @@ export function usePipeline() {
             }, delay))
           }
 
-          fire(200,  { type: PIPELINE_EVENTS.INTAKE,   durationMs: 185, completedAt: apiReturnedAt + 200 })
-          fire(600,  { type: PIPELINE_EVENTS.KEYWORD,  durationMs: 390, completedAt: apiReturnedAt + 600,
+          fire(200,  { type: PIPELINE_EVENTS.INTAKE,   durationMs: validationMs,  completedAt: apiReturnedAt + 200 })
+          fire(600,  { type: PIPELINE_EVENTS.KEYWORD,  durationMs: extractionMs,  completedAt: apiReturnedAt + 600,
             data: { present: result.present, missing: result.missing, matchScore: result.matchScore } })
-          fire(900,  { type: PIPELINE_EVENTS.SCORING,  durationMs: 295, completedAt: apiReturnedAt + 900,
+          fire(900,  { type: PIPELINE_EVENTS.SCORING,  durationMs: aiScoringMs,   completedAt: apiReturnedAt + 900,
             data: { score: result.score, grade: result.grade } })
-          fire(1200, { type: PIPELINE_EVENTS.FEEDBACK, durationMs: 285, completedAt: apiReturnedAt + 1200,
+          fire(1200, { type: PIPELINE_EVENTS.FEEDBACK, durationMs: persistenceMs, completedAt: apiReturnedAt + 1200,
             data: { suggestions: result.suggestions } })
-          fire(1500, { type: PIPELINE_EVENTS.PERSIST,  durationMs: 275, completedAt: apiReturnedAt + 1500 })
-          fire(1800, { type: PIPELINE_EVENTS.PERSIST_ACK, success: true, durationMs: 290, completedAt: apiReturnedAt + 1800 })
+          fire(1500, { type: PIPELINE_EVENTS.PERSIST,  durationMs: persistenceMs, completedAt: apiReturnedAt + 1500 })
+          fire(1800, { type: PIPELINE_EVENTS.PERSIST_ACK, success: true, durationMs: 0, completedAt: apiReturnedAt + 1800 })
         })
         .catch((err) => {
           if (err.name === 'AbortError') return

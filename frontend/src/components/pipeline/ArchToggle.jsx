@@ -1,4 +1,4 @@
-import { useArchMode } from '../../context/ArchitectureContext.jsx'
+﻿import { useArchMode } from '../../context/ArchitectureContext.jsx'
 
 export default function ArchToggle() {
   const { mode, setMode } = useArchMode()
@@ -11,7 +11,7 @@ export default function ArchToggle() {
         onClick={() => setMode('monolith')}
         aria-pressed={mode === 'monolith'}
       >
-        Monolithic
+        Layered Monolithic
       </button>
       <button
         id="arch-toggle-pipeline"

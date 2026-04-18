@@ -217,7 +217,7 @@ export default function ArchitecturePage() {
           <h2 style={{ fontSize:14, fontWeight:500, marginBottom:12, color:'var(--color-text-primary)' }}>Latency Waterfall</h2>
           {hasTimestamps ? (
             <>
-              {hasMonolith && <WaterfallChart timestamps={monolithTs} title="Monolith — Single Response Time" color="var(--color-text-secondary)" />}
+              {hasMonolith && <WaterfallChart timestamps={monolithTs} title="Layered Monolith — Single Response Time" color="var(--color-text-secondary)" />}
               {hasPipeline && <WaterfallChart timestamps={pipelineTs} title="Pipeline — Per-Filter Latency" color="var(--color-primary)" />}
             </>
           ) : (

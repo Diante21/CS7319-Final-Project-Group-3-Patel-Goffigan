@@ -12,10 +12,12 @@ public class TextExtractionFilter implements Filter {
 
     @Override
     public ResumePayload process(ResumePayload payload){
+        long start = System.currentTimeMillis();
         logger.debug("Running TextExtractionFilter");
 
         if (!payload.isValid()) {
             logger.warn("Skipping TextExtractionFilter due to validation failure: " + payload.getValidationMessage());
+            payload.recordTiming("textExtraction", System.currentTimeMillis() - start);
             return payload;
         }
 
@@ -27,10 +29,9 @@ public class TextExtractionFilter implements Filter {
                 .replaceAll("\\s+", " ")
                 .trim();
 
-
         payload.setCleanedContent(cleaned);
-        logger.info("TextExtractionFilter completed.");
+        payload.recordTiming("textExtraction", System.currentTimeMillis() - start);
+        logger.info("TextExtractionFilter completed. Duration: {}ms", payload.getFilterTimings().get("textExtraction"));
         return payload;
-
     }
 }

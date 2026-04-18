@@ -48,7 +48,6 @@ export function mapSpringResponse(raw) {
   const total = present.length + missing.length
   const matchScore = total > 0 ? Math.round((present.length / total) * 100) : 0
 
-  // Split feedback by | into separate suggestion points
   const suggestions = raw?.feedback
     ? raw.feedback
         .split('|')
@@ -57,6 +56,9 @@ export function mapSpringResponse(raw) {
         .map((text) => ({ category: 'Impact', text }))
     : []
 
+  // Extract real filter timings from backend
+  const filterTimings = raw?.filterTimings ?? null
+
   return {
     score,
     grade: getGrade(score),
@@ -64,5 +66,6 @@ export function mapSpringResponse(raw) {
     missing,
     matchScore,
     suggestions,
+    filterTimings,
   }
 }

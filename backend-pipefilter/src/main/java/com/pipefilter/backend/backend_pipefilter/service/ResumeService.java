@@ -13,9 +13,7 @@ import java.time.LocalDateTime;
 
 @Service
 public class ResumeService implements IResumeService {
-
     private static final Logger logger = LoggerFactory.getLogger(ResumeService.class);
-
     private final ResumePipeline pipeline;
 
     public ResumeService(ResumePipeline pipeline) {
@@ -23,9 +21,8 @@ public class ResumeService implements IResumeService {
     }
 
     @Override
-    public EvaluationResult analyzeResume(Resume resume) {
+    public ResumePayload analyzeResume(Resume resume) {
         resume.setSubmittedAt(LocalDateTime.now());
-
         ResumePayload payload = pipeline.execute(resume);
 
         if (!payload.isValid()) {
@@ -34,12 +31,9 @@ public class ResumeService implements IResumeService {
             failed.setScore(0);
             failed.setFeedback(payload.getValidationMessage());
             failed.setAnalyzedAt(LocalDateTime.now());
-            return failed;
+            payload.setEvaluationResult(failed);
         }
 
-        return payload.getEvaluationResult();
+        return payload;
     }
-
-
-
 }
